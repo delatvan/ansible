@@ -1,0 +1,14 @@
+---
+- name: Install terminal tools
+  hosts: linux_machines
+  become: yes
+  tasks:
+    - name: Install i3 and ranger (Debian/Ubuntu)
+      apt:
+        name:
+          - i3
+          - ranger
+          - neofetch
+          - polybar
+          - tmux
+        state: present

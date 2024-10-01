@@ -1,0 +1,60 @@
+---
+- name: Manage dotfiles with Stow
+  hosts: all
+  become: no  # Change to yes if you need superuser privileges
+  vars:
+    input_string: "cannot stow dotfiles/vim/.config/polybar/config.ini over existing target"
+    dotfiles_directory: ~/dotfiles  # Path to your dotfiles directory
+    stow_targets:  # List of directories under dotfiles to stow
+      - vim
+      - git
+
+  tasks:
+    - name: Ensure stow is installed
+      package:
+        name: stow
+        state: present
+
+    - name: Stow dotfiles
+      command: stow {{ item }}
+      args:
+        chdir: "{{ dotfiles_directory }}"
+      register: stow_result
+      ignore_errors: yes  # Continue on failure to handle deletion later
+      loop: "{{ stow_targets }}"
+
+      ###########
+    - name:
+      set_fact:
+        my_var: "{{ input_string | regex_search('dotfiles/\\w*/(([.\\w*]/?)*)\\sover', '\\1') }}"
+
+    - name: Print stow result
+      debug:
+        var: my_var
+
+        
+  #   - name: Print stow result
+  #     debug:
+  #       var: stow_result.results | selectattr('rc', 'ne', 0) | map(attribute='stderr') | regex_search('dotfiles\/vim\/(?P<path>)\s', '\\g<path>')
+    # - name: Handle failures
+    #   block:
+    #     - name: Delete original dotfile if stow fails
+    #       file:
+    #         path: "{{ ansible_env.HOME }}/.{{ item }}"
+    #         state: absent
+    #       when: item in stow_result.results | selectattr('rc', 'ne', 0) | map(attribute='cmd') | map('basename') | list
+    #       loop: "{{ stow_targets }}"
+
+    #     - name: Retry stowing dotfiles
+    #       command: stow {{ item }}
+    #       args:
+    #         chdir: "{{ dotfiles_directory }}"
+    #       loop: "{{ stow_targets }}"
+    #       when: item in stow_result.results | selectattr('rc', 'ne', 0) | map(attribute='cmd') | map('basename') | list
+
+    #   when: stow_result.results | selectattr('rc', 'ne', 0) | list | length > 0
+
+    # - name: Print message if all dotfiles stowed successfully
+    #   debug:
+    #     msg: "All dotfiles stowed successfully."
+    #   when: stow_result.results | selectattr('rc', 'eq', 0) | list | length == length(stow_targets)

@@ -1,0 +1,23 @@
+---
+- name: Manage directories and permissions based on host group
+  hosts: all
+  become: yes  # Use sudo to manage permissions
+  vars_files:
+    - vault.yml
+  tasks:
+    - name: Ensure /opt is writable by the user
+      file:
+        path: /opt
+        state: directory
+        mode: '0755'  # Ensure directory exists with appropriate permissions
+        owner: "{{ lookup('env', 'USER') }}"  # Set owner to the user
+        group: "{{ lookup('env', 'USER') }}"  # Set group to the user
+
+    - name: Create repos directory in /opt for specific groups
+      file:
+        path: /opt/repos
+        state: directory
+        mode: '0755'  # Set appropriate permissions
+        owner: "{{ lookup('env', 'USER') }}"  # Get the current user from the environment
+        group: "{{ lookup('env', 'USER') }}"  # Set group to the current user
+      when: "'pentest_group' in group_names or 'dev_group' in group_names or 'osint_group' in group_names"

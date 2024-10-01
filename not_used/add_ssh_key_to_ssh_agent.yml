@@ -1,0 +1,38 @@
+---
+- name: Add SSH key to ssh-agent
+  hosts: localhost
+  vars:
+    algorithm: "ed25519"
+    key_length: 256
+    ssh_dir: "{{ ansible_env.HOME }}/.ssh"
+    ssh_key_file: "{{ ssh_dir }}/id_{{ algorithm }}_{{ ansible_hostname }}"
+  vars_prompt:
+          - name: ssh_passphrase
+            prompt: "Enter the passphrase for the SSH key"
+            private: yes
+
+
+  tasks:
+    - name: Add SSH key to ssh-agent
+      ansible.builtin.shell: |
+        eval $(ssh-agent)
+        pass="{{ ssh_passphrase }}"
+        echo $pass
+
+        expect << EOF
+          spawn ssh-add "{{ ssh_key_file }}"
+          expect "Enter passphrase"
+          send "$pass\r"
+          expect eof
+        EOF
+        ssh-add -l
+      register: bash_output
+      environment:
+        SSH_AUTH_SOCK: "{{ lookup('env', 'SSH_AUTH_SOCK') }}"
+      vars:
+        ansible_ssh_user: "{{ lookup('env', 'USER') }}"
+
+    - name: Print the output
+      debug:
+        var: bash_output.stdout
+      

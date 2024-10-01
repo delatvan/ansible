@@ -1,0 +1,27 @@
+---
+- name: Clone Git repository with passphrase-protected SSH key
+  hosts: localhost
+  vars:
+    algorithm: "ed25519"
+    key_length: 256
+    ssh_dir: "{{ ansible_env.HOME }}/.ssh"
+    ssh_key_file: "{{ ssh_dir }}/id_{{ algorithm }}_{{ ansible_hostname }}"
+  
+  tasks:
+  
+    - name: Clone Git repository
+      ansible.builtin.git:
+        repo: "git@github.com:delatvan/dotfiles.git"
+        dest: /home/kali/dotfiles
+        version: master
+      environment:
+        GIT_SSH_COMMAND: "ssh -o StrictHostKeyChecking=no -i /home/kali/.ssh/id_ed25519_kali"
+
+    - name: Clone Git repository
+      ansible.builtin.git:
+        repo: "git@github.com:delatvan/bible.git"
+        dest: /home/kali/bible
+        version: master
+      environment:
+        GIT_SSH_COMMAND: "ssh -o StrictHostKeyChecking=no -i /home/kali/.ssh/id_ed25519_kali"
+

@@ -1,0 +1,13 @@
+---
+- name: Check identities in ssh-agent
+  hosts: localhost
+  tasks:
+    - name: Check identities in ssh-agent
+      shell: ssh-add -l
+      register: ssh_identities
+      ignore_errors: yes  # In case there are no identities or the agent is not running
+
+    - name: Print ssh-agent identities
+      debug:
+        msg: |
+          {{ ssh_identities.stdout | default("No identities found or ssh-agent not running.") }}

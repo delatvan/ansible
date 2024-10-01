@@ -1,0 +1,44 @@
+---
+- name: Manage directories based on host group
+  hosts: all
+  tasks:
+
+    - name: Debug HOME environment variable
+      debug:
+        msg: "{{ ansible_env.HOME }}"
+
+
+    - name: Delete unwanted directories if they exist
+      file:
+        path: "{{ item }}"
+        state: absent
+      loop:
+        - "{{ ansible_env.HOME }}/Music"
+        - "{{ ansible_env.HOME }}/Public"
+        - "{{ ansible_env.HOME }}/Templates"
+        - "{{ ansible_env.HOME }}/Videos"
+
+    - name: Create common directories for linux_machines
+      file:
+        path: "{{ item }}"
+        state: directory
+        mode: '0755'  # Set appropriate permissions
+      loop:
+        - "{{ ansible_env.HOME }}/tmp"
+        - "{{ ansible_env.HOME }}/github"
+        - "{{ ansible_env.HOME}}/projects"
+      when: "'linux_machines' in group_names"
+
+    - name: Create env directory for pentest_group, dev_group, or osint_group
+      file:
+        path: "{{ ansible_env.HOME }}/env"
+        state: directory
+        mode: '0755'  # Set appropriate permissions
+      when: "'pentest_group' in group_names or 'dev_group' in group_names or 'osint_group' in group_names"
+
+    - name: Create sak directory for pentest_group
+      file:
+        path: "{{ ansible_env.HOME }}/sak"
+        state: directory
+        mode: '0755'  # Set appropriate permissions
+      when: "'pentest_group' in group_names"

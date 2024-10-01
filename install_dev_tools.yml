@@ -1,0 +1,83 @@
+---
+- name: Install Obsidian and PyCharm on dev_group
+  hosts: dev_group
+  become: yes
+  tasks:
+
+    # Install Obsidian Snap package with --dangerous and --classic flags
+    - name: Install Obsidian via Snap
+      command: snap install obsidian --classic
+
+    # Install PyCharm (Community Edition)
+    - name: Download the PyCharm tarball
+      get_url:
+        url: "https://download.jetbrains.com/python/pycharm-professional-2024.2.3.tar.gz"  # Replace this with the latest download link
+        dest: "/tmp/pycharm.tar.gz"
+        mode: '0644'
+
+    - name: Download the PyCharm SHA256 checksum file
+      get_url:
+        url: "https://download.jetbrains.com/python/pycharm-professional-2024.2.3.tar.gz.sha256"
+        dest: "/tmp/pycharm.tar.gz.sha256"
+        mode: '0644'
+
+    - name: Verify SHA256 checksum of downloaded file
+      shell: |
+        sha256sum -c /tmp/pycharm.tar.gz.sha256
+      args:
+        warn: false
+      register: checksum_result
+      ignore_errors: yes
+
+    - name: Fail if checksum does not match
+      fail:
+        msg: "The checksum does not match. The download may be corrupted."
+      when: checksum_result.rc != 0
+
+    - name: Unpack the PyCharm tarball to /opt
+      unarchive:
+        src: "/tmp/pycharm.tar.gz"
+        dest: "/opt/"
+        remote_src: yes
+
+    - name: Find the PyCharm installation folder
+      find:
+        paths: "/opt"
+        patterns: "pycharm-*"
+        file_type: directory
+      register: pycharm_folder
+
+    - name: Ensure PyCharm was extracted successfully
+      fail:
+        msg: "PyCharm extraction failed!"
+      when: pycharm_folder.matched == 0
+
+    - name: Set the PyCharm bin directory path
+      set_fact:
+        pycharm_bin_path: "{{ pycharm_folder.files[0].path }}/bin"
+
+    - name: Create a symbolic link to the PyCharm launcher script (optional)
+      file:
+        src: "{{ pycharm_bin_path }}/pycharm.sh"
+        dest: "/usr/local/bin/pycharm"
+        state: link
+        mode: '0755'
+
+    # Install spotify
+    - name: Install Spotify using Snap
+      snap:
+        name: spotify
+        state: present
+
+    # Install Discord
+    - name: Install Discord using Snap
+      snap:
+        name: discord
+        state: present
+
+    # Install wireguard
+    - name: Install WireGuard using APT
+      apt:
+        name: wireguard
+        state: present
+        update_cache: yes  # Update the APT package cache
