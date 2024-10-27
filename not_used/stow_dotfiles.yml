@@ -1,0 +1,16 @@
+---
+- name: Manage dotfiles with Stow
+  hosts: all
+  become: no  # Change to yes if you need superuser privileges
+  vars:
+    input_string: "cannot stow dotfiles/vim/.config/polybar/config.ini over existing target"
+    dotfiles_directory: ~/dotfiles  # Path to your dotfiles directory
+    stow_targets:  # List of directories under dotfiles to stow
+      - vim
+      - git
+
+  tasks:
+    - name: Ensure stow is installed
+      package:
+        name: stow
+        state: present

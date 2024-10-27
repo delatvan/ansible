@@ -1,15 +1,20 @@
 #!/bin/bash
 
 # perform system updates
-apt update -y
-apt upgrade -y
+sudo apt update -y
+sudo apt upgrade -y
 
 # install necessary packages
-apt install epel-release -y
-apt install ansible -y
+sudo apt install epel-release -y
+sudo apt install ansible -y
+sudo apt install git -y
 
 # download ansible playbooks
-wget https://git@github.com:delatvan/ansible.git # get ansible pbs from github (they're gonna be public)
+git clone https://github.com/delatvan/ansible.git # get ansible pbs from github (they're gonna be public)
+cd ansible
+
+# check for the inventory.ini existence
+read -p "Press Enter to confirm you have created the inventory.ini in the ansible folder"
 
 # run standalone playbook for ssh keys
 ansible-playbook -i inventory.ini setup_ssh_keys.yml --ask-become-pass
@@ -23,3 +28,5 @@ echo "Continuing the script execution..."
 eval "$(ssh-agent)"
 ssh-add ~/.ssh/id_ed25519_$(hostname)
 ansible-playbook -i inventory.ini master_playbook.yml --ask-become-pass
+
+# working

@@ -3,23 +3,23 @@
   hosts: all
   gather_facts: yes
 
+- name: Install terminal tools
+  import_playbook: install_terminal_tools.yml
+
 - name: Run the setup folder structure playbook
   import_playbook: setup_folder_structure.yml
 
 - name: Run the setup folder permissions playbook
   import_playbook: setup_folder_permissions.yml
 
-- name: Get the Github Repos
-  import_playbook: github_repo.yml
-
-- name: Install dev tools
-  import_playbook: install_dev_tools.yml
-
 - name: Install Linux tools
   import_playbook: install_linux_tools.yml
 
-- name: Install terminal tools
-  import_playbook: install_terminal_tools.yml
+- name: Get the Github Repos
+  import_playbook: github_repos.yml
+
+- name: Install dev tools
+  import_playbook: install_dev_tools.yml
 
 - name: Stow dotfiles
   import_playbook: stow_dotfiles.yml

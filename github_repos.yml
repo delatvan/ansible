@@ -12,7 +12,7 @@
     - name: Clone Git repository
       ansible.builtin.git:
         repo: "git@github.com:delatvan/dotfiles.git"
-        dest: /home/kali/dotfiles
+        dest: "{{ ansible_env.HOME }}/dotfiles"
         version: master
       environment:
         GIT_SSH_COMMAND: "ssh -o StrictHostKeyChecking=no -i /home/kali/.ssh/id_ed25519_kali"
@@ -20,7 +20,7 @@
     - name: Clone Git repository
       ansible.builtin.git:
         repo: "git@github.com:delatvan/bible.git"
-        dest: /home/kali/bible
+        dest: "{{ ansible_env.HOME }}/bible"
         version: master
       environment:
         GIT_SSH_COMMAND: "ssh -o StrictHostKeyChecking=no -i /home/kali/.ssh/id_ed25519_kali"

@@ -11,28 +11,33 @@
     # Install PyCharm (Community Edition)
     - name: Download the PyCharm tarball
       get_url:
-        url: "https://download.jetbrains.com/python/pycharm-professional-2024.2.3.tar.gz"  # Replace this with the latest download link
+        url: "https://download.jetbrains.com/python/pycharm-community-2024.2.4.tar.gz"  # Replace this with the latest download link
         dest: "/tmp/pycharm.tar.gz"
         mode: '0644'
 
     - name: Download the PyCharm SHA256 checksum file
       get_url:
-        url: "https://download.jetbrains.com/python/pycharm-professional-2024.2.3.tar.gz.sha256"
+        url: "https://download.jetbrains.com/python/pycharm-community-2024.2.4.tar.gz.sha256"
         dest: "/tmp/pycharm.tar.gz.sha256"
         mode: '0644'
 
-    - name: Verify SHA256 checksum of downloaded file
-      shell: |
-        sha256sum -c /tmp/pycharm.tar.gz.sha256
-      args:
-        warn: false
-      register: checksum_result
-      ignore_errors: yes
+    - name: Read expected checksum from the .sha256 file
+      command: "awk '{print $1}' /tmp/pycharm.tar.gz.sha256"
+      register: expected_checksum
+      changed_when: false
 
-    - name: Fail if checksum does not match
-      fail:
-        msg: "The checksum does not match. The download may be corrupted."
-      when: checksum_result.rc != 0
+    - name: Calculate SHA256 checksum of the file
+      stat:
+        path: /tmp/pycharm.tar.gz
+        checksum_algorithm: sha256
+      register: file_stat
+
+    - name: Assert that the checksum matches the expected value
+      assert:
+        that:
+          - file_stat.stat.checksum == expected_checksum.stdout
+        fail_msg: "Checksum does not match! The file may be corrupted."
+        success_msg: "Checksum verified successfully!"
 
     - name: Unpack the PyCharm tarball to /opt
       unarchive:
@@ -81,3 +86,5 @@
         name: wireguard
         state: present
         update_cache: yes  # Update the APT package cache
+
+# working

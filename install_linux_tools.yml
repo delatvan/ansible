@@ -21,9 +21,8 @@
         state: present
 
     - name: Add Sublime Text repository (stable channel)
-      ansible.builtin.command:
-        cmd: echo "deb https://download.sublimetext.com/ apt/stable/" | sudo tee /etc/apt/sources.list.d/sublime-text.list
-      when: channel == "stable"
+      apt_repository:
+        repo: "deb https://download.sublimetext.com/ apt/stable/"
 
     - name: Update apt cache
       apt:
@@ -40,3 +39,5 @@
         state: present
         classic: yes  # Install with classic confinement
         channel: stable  # Specify the stable channel
+
+# working
