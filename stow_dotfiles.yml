@@ -13,7 +13,7 @@
     - name: Run stow --adopt for specific dotfiles
       command: "stow --adopt {{ item }}"
       args:
-        chdir: "{{ playbook_dir }}/dotfiles"
+        chdir: "{{ ansible_env.HOME }}/dotfiles"
       loop: "{{ dotfiles_dirs }}"
       register: stow_result
       ignore_errors: yes
@@ -22,7 +22,7 @@
     - name: Restore any changes to specific dotfiles with git
       command: git restore "{{ item }}"
       args:
-        chdir: "{{ playbook_dir }}/dotfiles"
+        chdir: "{{ ansible_env.HOME }}/dotfiles"
       loop: "{{ dotfiles_dirs }}"
       when: stow_result is succeeded
       tags: git_restore
