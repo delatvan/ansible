@@ -27,5 +27,11 @@
       when: stow_result is succeeded
       tags: git_restore
 
+# stow does not overwrite files
+# * existing target is neither a link nor a directoy: foo
+# Instead use the following for everything
 # stow --adopt * \ git restore .
+# OR for a particular file
 # stow --adopt bash \ git restore bash
+# stow will create a symlink in place of the actual file and overwrite the files inside your repository with the actual file
+# git will undo the changes and return to the original files but the symlinks will stay there.
